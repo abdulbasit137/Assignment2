@@ -94,10 +94,8 @@ string infixToPostfix(string exp) {
     for (char c : exp) {
         if (isalnum(c))
             result += c;
-
         else if (c == '(')
             st.push(c);
-
         else if (c == ')') {
             while (!st.empty() && st.top() != '(') {
                 result += st.top();
@@ -105,7 +103,6 @@ string infixToPostfix(string exp) {
             }
             st.pop();
         }
-
         else {
             while (!st.empty() && precedence(st.top()) >= precedence(c)) {
                 result += st.top();
@@ -161,28 +158,25 @@ int evaluatePostfix(string exp) {
 /*==================== QUESTION 5: ALGORITHMS ====================*/
 void printAlgorithms() {
     cout << "\nINFIX → PREFIX ALGORITHM:\n";
-    cout << "1. Reverse infix expression\n";
-    cout << "2. Replace ( with ) and vice versa\n";
+    cout << "1. Reverse expression\n";
+    cout << "2. Swap brackets\n";
     cout << "3. Convert to postfix\n";
-    cout << "4. Reverse postfix → prefix\n";
+    cout << "4. Reverse result\n";
 
-    cout << "\nPREFIX EVALUATION ALGORITHM:\n";
-    cout << "1. Scan from right to left\n";
-    cout << "2. If operand → push\n";
-    cout << "3. If operator → pop 2 operands\n";
-    cout << "4. Apply operator and push result\n";
+    cout << "\nPREFIX EVALUATION:\n";
+    cout << "1. Scan right to left\n";
+    cout << "2. Push operands\n";
+    cout << "3. Apply operator\n";
 }
 
 
 /*==================== QUESTION 6 ====================*/
 
-// Queue using 2 stacks
+// Queue using stacks
 struct QueueUsingStacks {
     stack<int> s1, s2;
 
-    void enqueue(int x) {
-        s1.push(x);
-    }
+    void enqueue(int x) { s1.push(x); }
 
     int dequeue() {
         if (s2.empty()) {
@@ -197,7 +191,7 @@ struct QueueUsingStacks {
     }
 };
 
-// Stack using 2 queues
+// Stack using queues
 struct StackUsingQueues {
     queue<int> q1, q2;
 
@@ -221,15 +215,12 @@ struct StackUsingQueues {
 struct QueueOfQueues {
     queue<queue<int>> qq;
 
-    void addQueue(queue<int> q) {
-        qq.push(q);
-    }
+    void addQueue(queue<int> q) { qq.push(q); }
 
     void display() {
         while (!qq.empty()) {
             queue<int> q = qq.front();
             qq.pop();
-
             while (!q.empty()) {
                 cout << q.front() << " ";
                 q.pop();
@@ -238,6 +229,71 @@ struct QueueOfQueues {
         }
     }
 };
+
+
+/*==================== QUESTION 7: CIRCULAR QUEUE REVERSAL ====================*/
+#define CQSIZE 10
+
+struct CircularQueue {
+    int arr[CQSIZE];
+    int front, rear;
+};
+
+void initCQ(CircularQueue &q) {
+    q.front = q.rear = -1;
+}
+
+bool isEmptyCQ(CircularQueue q) {
+    return q.front == -1;
+}
+
+bool isFullCQ(CircularQueue q) {
+    return (q.rear + 1) % CQSIZE == q.front;
+}
+
+void enqueueCQ(CircularQueue &q, int x) {
+    if (isFullCQ(q)) {
+        cout << "Queue Full\n";
+        return;
+    }
+    if (q.front == -1) q.front = 0;
+    q.rear = (q.rear + 1) % CQSIZE;
+    q.arr[q.rear] = x;
+}
+
+int dequeueCQ(CircularQueue &q) {
+    int x = q.arr[q.front];
+    if (q.front == q.rear)
+        q.front = q.rear = -1;
+    else
+        q.front = (q.front + 1) % CQSIZE;
+    return x;
+}
+
+void displayCQ(CircularQueue q) {
+    if (isEmptyCQ(q)) return;
+
+    int i = q.front;
+    while (true) {
+        cout << q.arr[i] << " ";
+        if (i == q.rear) break;
+        i = (i + 1) % CQSIZE;
+    }
+    cout << endl;
+}
+
+// Reverse using stack
+void reverseCQ(CircularQueue &q) {
+    stack<int> s;
+
+    while (!isEmptyCQ(q))
+        s.push(dequeueCQ(q));
+
+    while (!s.empty()) {
+        enqueueCQ(q, s.top());
+        s.pop();
+    }
+}
 
 
 /*==================== MAIN ====================*/
@@ -256,7 +312,6 @@ int main() {
     cout << "\n===== QUESTION 2 =====\n";
     StackArr S;
     initStack(S);
-
     pushStack(S, "red");
     pushStack(S, "yellow");
     pushStack(S, "green");
@@ -268,20 +323,12 @@ int main() {
     displayStack(S);
 
 
-    cout << "\n===== QUESTION 3 (INFIX → POSTFIX) =====\n";
+    cout << "\n===== QUESTION 3 =====\n";
     cout << infixToPostfix("(A+B)*(C-D)") << endl;
-    cout << infixToPostfix("A^B*C-D+E/F") << endl;
-    cout << infixToPostfix("A/(B+C*D-E)") << endl;
-    cout << infixToPostfix("A-B*C+D/E") << endl;
-    cout << infixToPostfix("(A+B)^2-(C-D)/2") << endl;
 
 
-    cout << "\n===== QUESTION 4 (POSTFIX EVALUATION) =====\n";
+    cout << "\n===== QUESTION 4 =====\n";
     cout << evaluatePostfix("AB+CD-*") << endl;
-    cout << evaluatePostfix("AB^C*D-EF/+") << endl;
-    cout << evaluatePostfix("ABCD*+E-/") << endl;
-    cout << evaluatePostfix("ABC*-DE/+") << endl;
-    cout << evaluatePostfix("AB+2^CD-2/-") << endl;
 
 
     cout << "\n===== QUESTION 5 =====\n";
@@ -289,27 +336,27 @@ int main() {
 
 
     cout << "\n===== QUESTION 6 =====\n";
-
     QueueUsingStacks q;
-    q.enqueue(10);
-    q.enqueue(20);
-    cout << "Dequeue: " << q.dequeue() << endl;
+    q.enqueue(10); q.enqueue(20);
+    cout << q.dequeue() << endl;
 
-    StackUsingQueues s;
-    s.push(5);
-    s.push(10);
-    cout << "Pop: " << s.pop() << endl;
 
-    QueueOfQueues qq;
-    queue<int> q1, q2;
-    q1.push(1); q1.push(2);
-    q2.push(3); q2.push(4);
+    cout << "\n===== QUESTION 7: CIRCULAR QUEUE REVERSAL =====\n";
+    CircularQueue cq;
+    initCQ(cq);
 
-    qq.addQueue(q1);
-    qq.addQueue(q2);
+    enqueueCQ(cq, 1);
+    enqueueCQ(cq, 2);
+    enqueueCQ(cq, 3);
+    enqueueCQ(cq, 4);
 
-    cout << "Queue of Queues:\n";
-    qq.display();
+    cout << "Original Queue: ";
+    displayCQ(cq);
+
+    reverseCQ(cq);
+
+    cout << "Reversed Queue: ";
+    displayCQ(cq);
 
     return 0;
 }

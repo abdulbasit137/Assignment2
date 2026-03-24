@@ -296,6 +296,35 @@ void reverseCQ(CircularQueue &q) {
 }
 
 
+/*==================== QUESTION 8: SPLIT CIRCULAR QUEUE ====================*/
+
+/**
+ * Splits a source circular queue into two based on element position.
+ * CQueue1: Receives elements at odd positions (1st, 3rd, 5th...)
+ * CQueue2: Receives elements at even positions (2nd, 4th, 6th...)
+ */
+void splitCircularQueue(CircularQueue& source, CircularQueue& q1, CircularQueue& q2) {
+    if (isEmptyCQ(source)) {
+        cout << "Source queue is empty. Nothing to split.\n";
+        return;
+    }
+
+    int i = source.front;
+    int position = 1; // Start counting from 1 (Odd)
+
+    while (true) {
+        if (position % 2 != 0) {
+            enqueueCQ(q1, source.arr[i]);
+        } else {
+            enqueueCQ(q2, source.arr[i]);
+        }
+
+        if (i == source.rear) break;
+        i = (i + 1) % CQSIZE;
+        position++;
+    }
+}
+
 /*==================== MAIN ====================*/
 int main() {
 
@@ -357,6 +386,28 @@ int main() {
 
     cout << "Reversed Queue: ";
     displayCQ(cq);
+
+
+    cout << "\n===== QUESTION 8: SPLIT CIRCULAR QUEUE =====\n";
+    CircularQueue source, CQueue1, CQueue2;
+    initCQ(source);
+    initCQ(CQueue1);
+    initCQ(CQueue2);
+
+    // Data from your image: 3, 5, 6, 7, 2, 1, 9, 8, 12, 10
+    int elements[] = {3, 5, 6, 7, 2, 1, 9, 8, 12, 10};
+    for (int x : elements) enqueueCQ(source, x);
+
+    cout << "Original Queue: ";
+    displayCQ(source);
+
+    splitCircularQueue(source, CQueue1, CQueue2);
+
+    cout << "CQueue 1 (Odd Positions): ";
+    displayCQ(CQueue1);
+
+    cout << "CQueue 2 (Even Positions): ";
+    displayCQ(CQueue2);
 
     return 0;
 }

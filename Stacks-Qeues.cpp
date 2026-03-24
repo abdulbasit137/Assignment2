@@ -1,36 +1,35 @@
 #include <iostream>
+#include <stack>
+#include <queue>
+#include <cmath>
 using namespace std;
 
-/*QUESTION 1: TWO STACKS IN ONE ARRAY*/
+/*==================== QUESTION 1: DOUBLE STACK ====================*/
 #define MAX 200
 
 struct DoubleStack {
     int arr[MAX];
-    int top1;  // stack for <= 1000
-    int top2;  // stack for > 1000
+    int top1;
+    int top2;
 };
 
-// Initialize
 void init(DoubleStack &ds) {
     ds.top1 = -1;
     ds.top2 = MAX;
 }
 
-// Push
 void push(DoubleStack &ds, int x) {
     if (ds.top1 + 1 == ds.top2) {
         cout << "Stack Overflow\n";
         return;
     }
 
-    if (x <= 1000) {
+    if (x <= 1000)
         ds.arr[++ds.top1] = x;
-    } else {
+    else
         ds.arr[--ds.top2] = x;
-    }
 }
 
-// Displaying both stacks
 void display(DoubleStack ds) {
     cout << "Stack1 (<=1000): ";
     for (int i = 0; i <= ds.top1; i++)
@@ -44,161 +43,218 @@ void display(DoubleStack ds) {
 }
 
 
-/*QUESTION 2: STACK  */
+/*==================== QUESTION 2: STACK ====================*/
 #define SIZE 100
 
-struct Stack {
+struct StackArr {
     string arr[SIZE];
     int top;
 };
 
-void initStack(Stack &s) {
-    s.top = -1;
-}
+void initStack(StackArr &s) { s.top = -1; }
 
-bool isEmpty(Stack s) {
-    return s.top == -1;
-}
+bool isEmpty(StackArr s) { return s.top == -1; }
 
-bool isFull(Stack s) {
-    return s.top == SIZE - 1;
-}
+void pushStack(StackArr &s, string x) { s.arr[++s.top] = x; }
 
-void pushStack(Stack &s, string x) {
-    if (isFull(s)) {
-        cout << "Stack Overflow\n";
-        return;
-    }
-    s.arr[++s.top] = x;
-}
+string popStack(StackArr &s) { return s.arr[s.top--]; }
 
-string popStack(Stack &s) {
-    if (isEmpty(s)) {
-        cout << "Stack Underflow\n";
-        return "";
-    }
-    return s.arr[s.top--];
-}
-
-void displayStack(Stack s) {
+void displayStack(StackArr s) {
     for (int i = s.top; i >= 0; i--)
         cout << s.arr[i] << " ";
     cout << endl;
 }
 
-
-/* PEZ CANDY ALGORITHM */
-void removeYellow(Stack &S) {
-    Stack T;
+void removeYellow(StackArr &S) {
+    StackArr T;
     initStack(T);
 
-    // Step 1: Remove yellow, store others in T
     while (!isEmpty(S)) {
         string x = popStack(S);
+        if (x != "yellow") pushStack(T, x);
+    }
 
-        if (x != "yellow") {
-            pushStack(T, x);
+    while (!isEmpty(T))
+        pushStack(S, popStack(T));
+}
+
+
+/*==================== QUESTION 3: INFIX → POSTFIX ====================*/
+int precedence(char op) {
+    if (op == '^') return 3;
+    if (op == '*' || op == '/') return 2;
+    if (op == '+' || op == '-') return 1;
+    return 0;
+}
+
+string infixToPostfix(string exp) {
+    stack<char> st;
+    string result = "";
+
+    for (char c : exp) {
+        if (isalnum(c))
+            result += c;
+
+        else if (c == '(')
+            st.push(c);
+
+        else if (c == ')') {
+            while (!st.empty() && st.top() != '(') {
+                result += st.top();
+                st.pop();
+            }
+            st.pop();
+        }
+
+        else {
+            while (!st.empty() && precedence(st.top()) >= precedence(c)) {
+                result += st.top();
+                st.pop();
+            }
+            st.push(c);
         }
     }
 
-    // Step 2: Restore order back to S
-    while (!isEmpty(T)) {
-        pushStack(S, popStack(T));
+    while (!st.empty()) {
+        result += st.top();
+        st.pop();
     }
+
+    return result;
 }
 
 
-/*SIX STACKS IN ONE ARRAY*/
-#define N 60
+/*==================== QUESTION 4: POSTFIX EVALUATION ====================*/
+int getValue(char c) {
+    if (c == 'A') return 12;
+    if (c == 'B') return 3;
+    if (c == 'C') return 7;
+    if (c == 'D') return 4;
+    if (c == 'E') return 2;
+    if (c == 'F') return 5;
+    return c - '0';
+}
 
-struct SixStacks {
-    int arr[N];
-    int top[6];
-    int start[6];
+int evaluatePostfix(string exp) {
+    stack<int> st;
+
+    for (char c : exp) {
+        if (isalnum(c)) {
+            st.push(getValue(c));
+        } else {
+            int b = st.top(); st.pop();
+            int a = st.top(); st.pop();
+
+            switch (c) {
+                case '+': st.push(a + b); break;
+                case '-': st.push(a - b); break;
+                case '*': st.push(a * b); break;
+                case '/': st.push(a / b); break;
+                case '^': st.push(pow(a, b)); break;
+            }
+        }
+    }
+    return st.top();
+}
+
+
+/*==================== QUESTION 5: ALGORITHMS ====================*/
+void printAlgorithms() {
+    cout << "\nINFIX → PREFIX ALGORITHM:\n";
+    cout << "1. Reverse infix expression\n";
+    cout << "2. Replace ( with ) and vice versa\n";
+    cout << "3. Convert to postfix\n";
+    cout << "4. Reverse postfix → prefix\n";
+
+    cout << "\nPREFIX EVALUATION ALGORITHM:\n";
+    cout << "1. Scan from right to left\n";
+    cout << "2. If operand → push\n";
+    cout << "3. If operator → pop 2 operands\n";
+    cout << "4. Apply operator and push result\n";
+}
+
+
+/*==================== QUESTION 6 ====================*/
+
+// Queue using 2 stacks
+struct QueueUsingStacks {
+    stack<int> s1, s2;
+
+    void enqueue(int x) {
+        s1.push(x);
+    }
+
+    int dequeue() {
+        if (s2.empty()) {
+            while (!s1.empty()) {
+                s2.push(s1.top());
+                s1.pop();
+            }
+        }
+        int x = s2.top();
+        s2.pop();
+        return x;
+    }
 };
 
-// Initializeing six stacks
-void initSixStacks(SixStacks &ss) {
-    int blockSize = N / 6;
+// Stack using 2 queues
+struct StackUsingQueues {
+    queue<int> q1, q2;
 
-    for (int i = 0; i < 6; i++) {
-        ss.start[i] = i * blockSize;
-        ss.top[i] = ss.start[i] - 1;
-    }
-}
-
-// Pushe into spaecific stack
-void pushSix(SixStacks &ss, int stackNum, int value) {
-    int end = (stackNum + 1) * (N / 6);
-
-    if (ss.top[stackNum] + 1 == end) {
-        cout << "Stack " << stackNum << " Overflow\n";
-        return;
+    void push(int x) {
+        q2.push(x);
+        while (!q1.empty()) {
+            q2.push(q1.front());
+            q1.pop();
+        }
+        swap(q1, q2);
     }
 
-    ss.arr[++ss.top[stackNum]] = value;
-}
-
-// Display one stack
-void displaySix(SixStacks ss, int stackNum) {
-    cout << "Stack " << stackNum << ": ";
-    for (int i = ss.start[stackNum]; i <= ss.top[stackNum]; i++)
-        cout << ss.arr[i] << " ";
-    cout << endl;
-}
-
-
-/* STACK OF STACKS */
-struct SimpleStack {
-    int arr[10];
-    int top;
+    int pop() {
+        int x = q1.front();
+        q1.pop();
+        return x;
+    }
 };
 
-struct StackOfStacks {
-    SimpleStack stacks[5];
+// Queue of Queues
+struct QueueOfQueues {
+    queue<queue<int>> qq;
+
+    void addQueue(queue<int> q) {
+        qq.push(q);
+    }
+
+    void display() {
+        while (!qq.empty()) {
+            queue<int> q = qq.front();
+            qq.pop();
+
+            while (!q.empty()) {
+                cout << q.front() << " ";
+                q.pop();
+            }
+            cout << endl;
+        }
+    }
 };
 
-// Initialize
-void initSOS(StackOfStacks &sos) {
-    for (int i = 0; i < 5; i++)
-        sos.stacks[i].top = -1;
-}
 
-// Push into a specific stack
-void pushSOS(StackOfStacks &sos, int index, int value) {
-    if (sos.stacks[index].top == 9) {
-        cout << "Inner Stack Overflow\n";
-        return;
-    }
-    sos.stacks[index].arr[++sos.stacks[index].top] = value;
-}
-
-// Display stack
-void displaySOS(StackOfStacks sos, int index) {
-    cout << "Stack " << index << ": ";
-    for (int i = sos.stacks[index].top; i >= 0; i--)
-        cout << sos.stacks[index].arr[i] << " ";
-    cout << endl;
-}
-
-
-
+/*==================== MAIN ====================*/
 int main() {
 
-    cout << "===== QUESTION 1: DOUBLE STACK =====\n";
+    cout << "===== QUESTION 1 =====\n";
     DoubleStack ds;
     init(ds);
-
     push(ds, 100);
     push(ds, 2000);
     push(ds, 500);
     push(ds, 1500);
-
     display(ds);
 
 
-    cout << "\n===== QUESTION 2: PEZ CANDY =====\n";
-    Stack S;
+    cout << "\n===== QUESTION 2 =====\n";
+    StackArr S;
     initStack(S);
 
     pushStack(S, "red");
@@ -207,38 +263,53 @@ int main() {
     pushStack(S, "yellow");
     pushStack(S, "blue");
 
-    cout << "Original Stack:\n";
     displayStack(S);
-
     removeYellow(S);
-
-    cout << "After Removing Yellow:\n";
     displayStack(S);
 
 
-    cout << "\n===== SIX STACKS IN ONE ARRAY =====\n";
-    SixStacks ss;
-    initSixStacks(ss);
-
-    pushSix(ss, 0, 10);
-    pushSix(ss, 1, 20);
-    pushSix(ss, 2, 30);
-
-    displaySix(ss, 0);
-    displaySix(ss, 1);
-    displaySix(ss, 2);
+    cout << "\n===== QUESTION 3 (INFIX → POSTFIX) =====\n";
+    cout << infixToPostfix("(A+B)*(C-D)") << endl;
+    cout << infixToPostfix("A^B*C-D+E/F") << endl;
+    cout << infixToPostfix("A/(B+C*D-E)") << endl;
+    cout << infixToPostfix("A-B*C+D/E") << endl;
+    cout << infixToPostfix("(A+B)^2-(C-D)/2") << endl;
 
 
-    cout << "\n===== STACK OF STACKS =====\n";
-    StackOfStacks sos;
-    initSOS(sos);
+    cout << "\n===== QUESTION 4 (POSTFIX EVALUATION) =====\n";
+    cout << evaluatePostfix("AB+CD-*") << endl;
+    cout << evaluatePostfix("AB^C*D-EF/+") << endl;
+    cout << evaluatePostfix("ABCD*+E-/") << endl;
+    cout << evaluatePostfix("ABC*-DE/+") << endl;
+    cout << evaluatePostfix("AB+2^CD-2/-") << endl;
 
-    pushSOS(sos, 0, 1);
-    pushSOS(sos, 0, 2);
-    pushSOS(sos, 1, 10);
 
-    displaySOS(sos, 0);
-    displaySOS(sos, 1);
+    cout << "\n===== QUESTION 5 =====\n";
+    printAlgorithms();
+
+
+    cout << "\n===== QUESTION 6 =====\n";
+
+    QueueUsingStacks q;
+    q.enqueue(10);
+    q.enqueue(20);
+    cout << "Dequeue: " << q.dequeue() << endl;
+
+    StackUsingQueues s;
+    s.push(5);
+    s.push(10);
+    cout << "Pop: " << s.pop() << endl;
+
+    QueueOfQueues qq;
+    queue<int> q1, q2;
+    q1.push(1); q1.push(2);
+    q2.push(3); q2.push(4);
+
+    qq.addQueue(q1);
+    qq.addQueue(q2);
+
+    cout << "Queue of Queues:\n";
+    qq.display();
 
     return 0;
 }
